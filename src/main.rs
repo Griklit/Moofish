@@ -1,11 +1,12 @@
-use std::io::{Write, stdout};
+use std::io::{stdout, Write};
 
-use rand::rngs::ThreadRng;
+use rand::SeedableRng;
+use rand_xorshift::XorShiftRng;
 
-use moofish::{Printer, cargo};
+use moofish::{cargo, Printer};
 
 fn main() {
-    let mut x = cargo::Compile::new(ThreadRng::default(), 512);
+    let mut x = cargo::Compile::new(XorShiftRng::from_entropy(), 512);
     x.colorful(true);
     let mut io = stdout();
     for i in x {

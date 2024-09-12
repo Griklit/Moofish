@@ -12,9 +12,10 @@ pub struct Compile<R: Rng> {
     pub colorful: bool,
     rng: R,
     crates: Vec<(Crate, Vec<Crate>)>,
-    current: Crate,
-    dependencies: Vec<Crate>,
-    dependency: Option<Crate>,
+    current: Crate,  // 当前包
+    dependencies: Vec<Crate>,  // 当前包的依赖
+    dependency: Option<Crate>,  // 当前包正在编译的依赖，若为None则表示正在编译当前包
+    compile_speed: u8,  // 包编译速度, 1-3
     total: usize,
     progress_one: f32,
 }
@@ -39,13 +40,14 @@ impl<R: Rng> Compile<R> {
         }
         let (current, mut dependencies) = crate_with_depends.pop().unwrap();
         let dependency = dependencies.pop();
-
+        let speed = rng.gen_range(0..=255u8);
         Compile {
             colorful: false,
             crates: crate_with_depends,
             current,
             dependencies,
             dependency,
+            compile_speed: if speed < 16 { 1 } else if speed < 64 { 2 } else { 3 },  // 包编译速度
             total,
             progress_one: 0.0,
             rng,
@@ -127,16 +129,29 @@ impl<R: Rng> Iterator for Compile<R> {
                 let (current, dependencies) = self.crates.pop()?;
                 self.current = current;
                 self.dependencies = dependencies;
-                self.dependency = self.dependencies.pop();
-                self.progress_one = 0.0;
-            } else {
-                self.dependency = self.dependencies.pop();
-                self.progress_one = 0.0;
             }
+            self.dependency = self.dependencies.pop();
+            self.progress_one = 0.0;
+            let speed = self.rng.gen_range(0..=255u8);
+            self.compile_speed = if speed < 16 { 1 } else if speed < 64 { 2 } else { 3 };
             ret
         } else {
-            let add = self.rng.gen_range(0.01..1.0);
-            let duration = Duration::from_millis(self.rng.gen_range(100..2000));
+            let mut add;
+            let mut duration;
+            match self.compile_speed {
+                1 => {
+                    add = self.rng.gen_range(0.01..0.1);
+                    duration = Duration::from_millis(self.rng.gen_range(500..2000));
+                }
+                2 => {
+                    add = self.rng.gen_range(0.1..0.5);
+                    duration = Duration::from_millis(self.rng.gen_range(100..500));
+                }
+                _ => {
+                    add = self.rng.gen_range(0.5..1.0);
+                    duration = Duration::from_millis(self.rng.gen_range(10..100));
+                }
+            }
             sleep(duration);
             self.progress_one += add;
             Some(self.building())
