@@ -14,7 +14,6 @@ pub struct Compile<R: Rng + ?Sized> {
     current: Crate,
     compiling: [Option<Crate>; 2],
     finished: Vec<Crate>,
-    total_one: u16,
     progress_one: f32,
     rng: R,
 }
@@ -29,7 +28,6 @@ impl<R: Rng + Sized> Compile<R> {
             current,
             compiling: [None, None],
             finished: Vec::new(),
-            total_one: rng.gen_range(1..100),
             progress_one: 0.0,
             rng,
         }
@@ -54,7 +52,9 @@ impl<R: Rng + Sized> Compile<R> {
     }
 
     fn progress_ratio(&self) -> String {
-        format!("{}/{}", (self.total_one as f32 * self.progress_one).round() as u16, self.total_one)
+        let total = self.crates.len() + self.finished.len() + 1;
+        let current = self.finished.len() + 1;
+        format!("{}/{}", current, total)
     }
 
     fn compiling(&self) -> String {
@@ -67,8 +67,9 @@ impl<R: Rng + Sized> Compile<R> {
         line.push_str(&self.progress_bar().as_str());
         line.push(' ');
         line.push_str(&self.progress_ratio().as_str());
-        line.push_str(": ");
+        //TODO 这两个值应当是正在编译的库以及此库的依赖库
         if let Some(c) = self.compiling[0] {
+            line.push_str(": ");
             line.push_str(&c.name);
         }
         if let Some(c) = self.compiling[1] {
@@ -90,7 +91,6 @@ impl<R: Rng + Sized> Iterator for Compile<R> {
             let ret = Some(self.compiling());
             self.finished.push(self.current.clone());
             self.current = self.crates.pop()?;
-            self.total_one = self.rng.gen_range(1..100);
             let finished = self.finished.choose_multiple(&mut self.rng, 2).cloned().collect::<Vec<Crate>>();
             match finished.len() {
                 0 => {
