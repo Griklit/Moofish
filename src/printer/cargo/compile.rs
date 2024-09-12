@@ -80,19 +80,23 @@ impl<R: Rng> Compile<R> {
     }
 
     fn compiling(&self) -> String {
-        if let Some(dependency) = self.dependency {
-            if self.colorful {
-                format!("\r\x1b[2K   \x1b[32;1mCompiling\x1b[0m {} {}\n", dependency.name, dependency.version)
-            } else {
-                format!("\r\x1b[2K   Compiling {} {}\n", dependency.name, dependency.version)
-            }
+        let mut line = "\r\x1b[2K".to_string();
+        if self.colorful {
+            line.push_str("   \x1b[1;34mCompiling\x1b[0m ");
         } else {
-            if self.colorful {
-                format!("\r\x1b[2K   \x1b[32;1mCompiling\x1b[0m {} {}\n", self.current.name, self.current.version)
-            } else {
-                format!("\r\x1b[2K   Compiling {} {}\n", self.current.name, self.current.version)
-            }
+            line.push_str("   Compiling ");
         }
+        if let Some(dependency) = self.dependency {
+            line.push_str(format!("{} {}", dependency.name, dependency.version).as_str());
+        } else {
+            line.push_str(format!("{} {}", self.current.name, self.current.version).as_str());
+        }
+        if cfg!(target_os = "windows") {
+            line.push_str("\r\n");
+        } else {
+            line.push_str("\n");
+        }
+        line
     }
 
     fn building(&self) -> String {
@@ -136,8 +140,8 @@ impl<R: Rng> Iterator for Compile<R> {
             self.compile_speed = if speed < 16 { 1 } else if speed < 64 { 2 } else { 3 };
             ret
         } else {
-            let mut add;
-            let mut duration;
+            let add;
+            let duration;
             match self.compile_speed {
                 1 => {
                     add = self.rng.gen_range(0.01..0.1);
