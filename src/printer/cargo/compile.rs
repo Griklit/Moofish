@@ -8,32 +8,48 @@ use rand::seq::SliceRandom;
 use crate::printer::Printer;
 use super::data::{Crate, CRATES};
 
-pub struct Compile<R: Rng + ?Sized> {
+pub struct Compile<R: Rng> {
     pub colorful: bool,
-    crates: Vec<Crate>,
-    current: Crate,
-    compiling: [Option<Crate>; 2],
-    finished: Vec<Crate>,
-    progress_one: f32,
     rng: R,
+    crates: Vec<(Crate, Vec<Crate>)>,
+    current: Crate,
+    dependencies: Vec<Crate>,
+    dependency: Option<Crate>,
+    total: usize,
+    progress_one: f32,
 }
 
-impl<R: Rng + Sized> Compile<R> {
+impl<R: Rng> Compile<R> {
     pub fn new(mut rng: R, count: usize) -> Self {
         let mut crates = CRATES.choose_multiple(&mut rng, count).cloned().collect::<Vec<Crate>>();
-        let current = crates.pop().unwrap();
+        let total = crates.len();
+        let mut crate_with_depends = Vec::new();
+        while let Some(current) = crates.pop() {
+            let mut dependencies = Vec::new();
+            let d_count = rng.gen_range(0..16);
+            for _ in 0..d_count {
+                let d = crates.pop();
+                if let Some(d) = d {
+                    dependencies.push(d);
+                } else {
+                    break;
+                }
+            }
+            crate_with_depends.push((current, dependencies));
+        }
+        let (current, mut dependencies) = crate_with_depends.pop().unwrap();
+        let dependency = dependencies.pop();
+
         Compile {
             colorful: false,
-            crates,
+            crates: crate_with_depends,
             current,
-            compiling: [None, None],
-            finished: Vec::new(),
+            dependencies,
+            dependency,
+            total,
             progress_one: 0.0,
             rng,
         }
-    }
-    fn current_version(&self) -> String {
-        format!("v{}.{}.{}", self.current.version.0, self.current.version.1, self.current.version.2)
     }
 
     fn progress_bar(&self) -> String {
@@ -52,13 +68,21 @@ impl<R: Rng + Sized> Compile<R> {
     }
 
     fn progress_ratio(&self) -> String {
-        let total = self.crates.len() + self.finished.len() + 1;
-        let current = self.finished.len() + 1;
-        format!("{}/{}", current, total)
+        let current = self.total - (
+            self.crates.len()
+                + self.crates.iter().map(|(_, d)| d.len()).sum::<usize>()
+                + self.dependencies.len()
+                + self.dependency.is_some() as usize
+        );
+        format!("{}/{}", current, self.total)
     }
 
     fn compiling(&self) -> String {
-        format!("\r\x1b[2K   Compiling {} {}\n", self.current.name, self.current_version())
+        if let Some(dependency) = self.dependency {
+            format!("\r\x1b[2K   Compiling {} {}\n", dependency.name, dependency.version)
+        } else {
+            format!("\r\x1b[2K   Compiling {} {}\n", self.current.name, self.current.version)
+        }
     }
 
     fn building(&self) -> String {
@@ -67,20 +91,17 @@ impl<R: Rng + Sized> Compile<R> {
         line.push_str(&self.progress_bar().as_str());
         line.push(' ');
         line.push_str(&self.progress_ratio().as_str());
-        //TODO 这两个值应当是正在编译的库以及此库的依赖库
-        if let Some(c) = self.compiling[0] {
-            line.push_str(": ");
-            line.push_str(&c.name);
-        }
-        if let Some(c) = self.compiling[1] {
+        line.push_str(": ");
+        line.push_str(self.current.name);
+        if let Some(dependency) = &self.dependency {
             line.push_str(", ");
-            line.push_str(&c.name);
+            line.push_str(dependency.name);
         }
         line
     }
 }
 
-impl<R: Rng + Sized> Iterator for Compile<R> {
+impl<R: Rng> Iterator for Compile<R> {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -89,21 +110,16 @@ impl<R: Rng + Sized> Iterator for Compile<R> {
             Some(self.building())
         } else if self.progress_one >= 1.0 {
             let ret = Some(self.compiling());
-            self.finished.push(self.current.clone());
-            self.current = self.crates.pop()?;
-            let finished = self.finished.choose_multiple(&mut self.rng, 2).cloned().collect::<Vec<Crate>>();
-            match finished.len() {
-                0 => {
-                    self.compiling = [None, None];
-                }
-                1 => {
-                    self.compiling = [Some(finished[0].clone()), None];
-                }
-                _ => {
-                    self.compiling = [Some(finished[0].clone()), Some(finished[1].clone())];
-                }
+            if self.dependency.is_none() {
+                let (current, dependencies) = self.crates.pop()?;
+                self.current = current;
+                self.dependencies = dependencies;
+                self.dependency = self.dependencies.pop();
+                self.progress_one = 0.0;
+            } else {
+                self.dependency = self.dependencies.pop();
+                self.progress_one = 0.0;
             }
-            self.progress_one = 0.0;
             ret
         } else {
             let add = self.rng.gen_range(0.01..0.5);
@@ -115,18 +131,9 @@ impl<R: Rng + Sized> Iterator for Compile<R> {
     }
 }
 
-impl<R: Rng + Sized> Printer for Compile<R> {
+impl<R: Rng> Printer for Compile<R> {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         self.colorful = enable;
         self
-    }
-}
-
-
-#[test]
-fn test() {
-    let x = Compile::default();
-    for i in x {
-        println!("{}", i);
     }
 }

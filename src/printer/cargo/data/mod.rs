@@ -1,3 +1,3 @@
 mod crates;
 
-pub use crates::{Crate, CRATES};
+pub use crates::{Crate, CrateVersion, CRATES};
