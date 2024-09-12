@@ -7,4 +7,9 @@ edition = "2021"
 name = "moofish"
 path = "src/lib.rs"
 
+[[bin]]
+name = "moofish"
+path = "src/main.rs"
+
 [dependencies]
+rand = { version = "0.8" }
