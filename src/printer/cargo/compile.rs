@@ -79,15 +79,28 @@ impl<R: Rng> Compile<R> {
 
     fn compiling(&self) -> String {
         if let Some(dependency) = self.dependency {
-            format!("\r\x1b[2K   Compiling {} {}\n", dependency.name, dependency.version)
+            if self.colorful {
+                format!("\r\x1b[2K   \x1b[32;1mCompiling\x1b[0m {} {}\n", dependency.name, dependency.version)
+            } else {
+                format!("\r\x1b[2K   Compiling {} {}\n", dependency.name, dependency.version)
+            }
         } else {
-            format!("\r\x1b[2K   Compiling {} {}\n", self.current.name, self.current.version)
+            if self.colorful {
+                format!("\r\x1b[2K   \x1b[32;1mCompiling\x1b[0m {} {}\n", self.current.name, self.current.version)
+            } else {
+                format!("\r\x1b[2K   Compiling {} {}\n", self.current.name, self.current.version)
+            }
         }
     }
 
     fn building(&self) -> String {
         let mut line = String::new();
-        line.push_str("\r\x1b[2K    Building ");
+        line.push_str("\r\x1b[2K");
+        if self.colorful {
+            line.push_str("    \x1b[1;34mBuilding\x1b[0m ");
+        } else {
+            line.push_str("    Building ");
+        }
         line.push_str(&self.progress_bar().as_str());
         line.push(' ');
         line.push_str(&self.progress_ratio().as_str());
@@ -122,8 +135,8 @@ impl<R: Rng> Iterator for Compile<R> {
             }
             ret
         } else {
-            let add = self.rng.gen_range(0.01..0.5);
-            let duration = Duration::from_millis(self.rng.gen_range(100..500));
+            let add = self.rng.gen_range(0.01..1.0);
+            let duration = Duration::from_millis(self.rng.gen_range(100..2000));
             sleep(duration);
             self.progress_one += add;
             Some(self.building())
