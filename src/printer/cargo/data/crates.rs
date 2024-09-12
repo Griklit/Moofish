@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Crate {
     pub name: &'static str,
     pub version: (u16, u16, u16),
