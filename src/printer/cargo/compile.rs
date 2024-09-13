@@ -124,11 +124,12 @@ impl<R: Rng> Iterator for Compile<R> {
     fn next(&mut self) -> Option<Self::Item> {
         let ret = Some(self.compiling() + &self.building());
         if self.completed != 0 {
-            match self.rng.gen_range(0..=255u8) {
-                0u8..=15 => sleep(Duration::from_millis(self.rng.gen_range(500..=4000))),
-                16..=63 => sleep(Duration::from_millis(self.rng.gen_range(200..=500))),
-                _ => sleep(Duration::from_millis(self.rng.gen_range(50..=200))),
-            }
+            let sleep_range = match self.rng.gen_range(0..=255u8) {
+                0..=15 => 500..=4000,
+                16..=63 => 200..=500,
+                _ => 50..=200,
+            };
+            sleep(Duration::from_millis(self.rng.gen_range(sleep_range)))
         }
         if self.dependency.is_none() {
             let (current, dependencies) = self.crates.pop()?;
