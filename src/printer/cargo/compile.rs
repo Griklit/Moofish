@@ -1,12 +1,12 @@
+use std::cmp;
 use std::thread::sleep;
 use std::time::Duration;
-use std::cmp;
-use std::ops::Add;
 
 use rand::Rng;
 use rand::seq::SliceRandom;
 
 use crate::printer::Printer;
+
 use super::data::{Crate, CRATES};
 
 pub struct Compile<R: Rng> {
@@ -125,7 +125,7 @@ impl<R: Rng> Iterator for Compile<R> {
         let ret = Some(self.compiling() + &self.building());
         if self.completed != 0 {
             match self.rng.gen_range(0..=255u8) {
-                0..=16 => sleep(Duration::from_millis(self.rng.gen_range(500..=4000))),
+                0u8..=15 => sleep(Duration::from_millis(self.rng.gen_range(500..=4000))),
                 16..=63 => sleep(Duration::from_millis(self.rng.gen_range(200..=500))),
                 _ => sleep(Duration::from_millis(self.rng.gen_range(50..=200))),
             }
