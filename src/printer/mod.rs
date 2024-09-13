@@ -1,5 +1,7 @@
 mod traits;
 pub mod cargo;
-mod pip;
+pub mod pip;
+pub mod tar;
+
 
 pub use traits::Printer;
