@@ -7,7 +7,7 @@ use rand::seq::SliceRandom;
 
 use crate::printer::Printer;
 
-use super::data::{Crate, CRATES};
+use crate::data::crates::{Crate, CRATES};
 
 pub struct Compile<R: Rng> {
     pub colorful: bool,

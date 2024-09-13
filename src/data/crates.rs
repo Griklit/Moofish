@@ -1,3 +1,4 @@
+/// 热度前512的Crate
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, Eq, PartialEq)]
