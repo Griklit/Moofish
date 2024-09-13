@@ -2,8 +2,10 @@
 use std::path::PathBuf;
 use std::thread::sleep;
 use std::time::Duration;
+
 use rand::Rng;
 use rand::seq::SliceRandom;
+
 use crate::data::words::{EXTENSIONS, WORDS};
 use crate::Printer;
 
@@ -99,7 +101,7 @@ impl<R: Rng> Iterator for Extract<R> {
         self.random();
         self.limit -= 1;
         let file_size_level = self.rng.gen_range(u8::MIN..=u8::MAX);
-        let mut duration_range;
+        let duration_range;
         if file_size_level > 8 {
             duration_range = 5..=10;
         } else if file_size_level > 1 {
