@@ -99,7 +99,7 @@ impl<R: Rng> Compile<R> {
 
     fn building(&self) -> String {
         let mut line = String::new();
-        line.push_str("\r\x1b[2K");
+        // line.push_str("\r\x1b[2K");
         if self.colorful {
             line.push_str("    \x1b[1;34mBuilding\x1b[0m ");
         } else {
