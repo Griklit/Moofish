@@ -1,3 +1,4 @@
+pub use download::Download;
+
 mod download;
 
-pub use download::Download;

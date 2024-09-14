@@ -2,12 +2,11 @@ use std::cmp;
 use std::thread::sleep;
 use std::time::Duration;
 
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rand::seq::SliceRandom;
 
-use crate::printer::Printer;
-
 use crate::data::crates::{Crate, CRATES};
+use crate::printer::Printer;
 
 pub struct Compile<R: Rng> {
     pub colorful: bool,
@@ -146,5 +145,11 @@ impl<R: Rng> Printer for Compile<R> {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         self.colorful = enable;
         self
+    }
+}
+
+impl Default for Compile<rand_xorshift::XorShiftRng> {
+    fn default() -> Self {
+        Compile::new(rand_xorshift::XorShiftRng::from_entropy(), 32)
     }
 }

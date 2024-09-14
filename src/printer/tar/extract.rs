@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::thread::sleep;
 use std::time::Duration;
 
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rand::seq::SliceRandom;
 
 use crate::data::words::{EXTENSIONS, WORDS};
@@ -118,5 +118,11 @@ impl<R: Rng> Printer for Extract<R> {
     /// 设置是否启用彩色输出，此处不支持
     fn colorful(&mut self, _enable: bool) -> &mut Self {
         self
+    }
+}
+
+impl Default for Extract<rand_xorshift::XorShiftRng> {
+    fn default() -> Self {
+        Extract::new(rand_xorshift::XorShiftRng::from_entropy(), 2usize.pow(12))
     }
 }

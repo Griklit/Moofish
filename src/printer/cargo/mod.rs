@@ -1,3 +1,4 @@
+pub use compile::Compile;
+
 mod compile;
 
-pub use compile::Compile;

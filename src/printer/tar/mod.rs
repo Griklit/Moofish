@@ -1,3 +1,4 @@
+pub use extract::Extract;
+
 mod extract;
 
-pub use extract::Extract;
