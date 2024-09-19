@@ -1,7 +1,7 @@
 /// 热度前512的Crate
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct CrateVersion(u16, u16, u16);
 
 impl Display for CrateVersion {
@@ -10,7 +10,7 @@ impl Display for CrateVersion {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct Crate {
     pub name: &'static str,
     pub version: CrateVersion,

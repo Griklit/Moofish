@@ -8,6 +8,7 @@ use rand::seq::SliceRandom;
 use crate::data::crates::{Crate, CRATES};
 use crate::printer::Printer;
 
+#[derive(Clone, Debug)]
 pub struct Compile<R: Rng> {
     pub colorful: bool,
     rng: R,

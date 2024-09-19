@@ -9,6 +9,7 @@ use rand::seq::SliceRandom;
 use crate::data::words::{EXTENSIONS, WORDS};
 use crate::Printer;
 
+#[derive(Clone, Debug)]
 pub struct Extract<R: Rng> {
     rng: R,
     path: PathBuf,
