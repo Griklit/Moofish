@@ -32,11 +32,11 @@ impl ShellOutput for CargoComponent {
 #[derive(Clone, Debug)]
 pub struct Cargo {
     pub colorful: bool,
-    printer: CargoComponent,
+    component: CargoComponent,
 }
 
 impl Cargo {
-    fn random_printer() -> CargoComponent {
+    fn random_component() -> CargoComponent {
         let mut rng = XorShiftRng::from_entropy();
         let count = rng.gen_range(8..=512);
         CargoComponent::Compile(Compile::new(rng, count))
@@ -48,11 +48,11 @@ impl Iterator for Cargo {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let line = self.printer.next();
+        let line = self.component.next();
         if line.is_some() {
             line
         } else {
-            self.printer = Cargo::random_printer();
+            self.component = Cargo::random_component();
             self.next()
         }
     }
@@ -70,7 +70,7 @@ impl Default for Cargo {
     fn default() -> Self {
         Cargo {
             colorful: false,
-            printer: Cargo::random_printer(),
+            component: Cargo::random_component(),
         }
     }
 }

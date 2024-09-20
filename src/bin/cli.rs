@@ -1,8 +1,9 @@
+use std::collections::HashSet;
 use std::time::Duration;
 
 use clap::Parser;
 
-use moofish::ShellAdapter;
+use moofish::{ShellAdapter, ShellOutput};
 
 fn runtime_parser(s: &str) -> Result<Duration, String> {
     let chars = s.chars().collect::<Vec<char>>();
@@ -37,17 +38,20 @@ struct Args {
     #[arg(short = 't', long, value_parser = runtime_parser, default_value = "5s")]
     runtime: Duration,
 
-    /// The printer to use [tar | cargo]
+    /// The printer to use [cargo | tar]
     #[arg(required = true)]
-    adapter: Vec<ShellAdapter>,
+    adapters: Vec<ShellAdapter>,
 }
 
 fn main() {
-    let mut args = Args::parse();
+    let args = Args::parse();
     println!("{:?}", args);
+    let Args { colorful, runtime, mut adapters } = args;
+    let _ = adapters.iter_mut().map(|adapter| adapter.colorful(colorful));
+    let adapters: HashSet<ShellAdapter> = adapters.into_iter().collect();
     let start_time = std::time::Instant::now();
-    while std::time::Instant::now().duration_since(start_time) < args.runtime {
-        let line = args.adapter[0].next();
+    while std::time::Instant::now().duration_since(start_time) < runtime {
+        let line = adapters[0].next();
         match line {
             Some(line) => { println!("{}", line); }
             None => { break; }

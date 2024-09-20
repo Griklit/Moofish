@@ -26,7 +26,6 @@ impl FromStr for ShellAdapter {
     }
 }
 
-
 impl Iterator for ShellAdapter {
     type Item = String;
 
