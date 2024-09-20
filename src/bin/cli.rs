@@ -16,7 +16,7 @@ fn runtime_parser(s: &str) -> Result<Duration, String> {
         number = chars[0..chars.len() - 1].into_iter().collect::<String>().parse::<u64>().map_err(|e| e.to_string())?;
         unit = last;
     }
-    match last {
+    match unit {
         's' => Ok(Duration::from_secs(number)),
         'm' => Ok(Duration::from_secs(number * 60)),
         'h' => Ok(Duration::from_secs(number * 60 * 60)),
