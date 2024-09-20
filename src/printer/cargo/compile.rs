@@ -6,7 +6,7 @@ use rand::{Rng, SeedableRng};
 use rand::seq::SliceRandom;
 
 use crate::data::crates::{Crate, CRATES};
-use crate::printer::Printer;
+use crate::printer::ShellOutput;
 
 #[derive(Clone, Debug)]
 pub struct Compile<R: Rng> {
@@ -142,7 +142,7 @@ impl<R: Rng> Iterator for Compile<R> {
     }
 }
 
-impl<R: Rng> Printer for Compile<R> {
+impl<R: Rng> ShellOutput for Compile<R> {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         self.colorful = enable;
         self

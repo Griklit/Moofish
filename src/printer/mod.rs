@@ -1,5 +1,5 @@
-pub use enums::PrinterTypes;
-pub use traits::Printer;
+pub use enums::ShellAdapter;
+pub use traits::ShellOutput;
 
 mod traits;
 pub mod cargo;

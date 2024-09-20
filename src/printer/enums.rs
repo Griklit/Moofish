@@ -1,50 +1,50 @@
 use std::str::FromStr;
 use rand_xorshift::XorShiftRng;
 
-use crate::Printer;
+use crate::ShellOutput;
 
 use super::{cargo, tar};
 
 #[derive(Debug, Clone)]
-pub enum PrinterTypes {
+pub enum ShellAdapter {
     Cargo(cargo::Cargo),
     // Pip,
     Tar(tar::Extract<XorShiftRng>), // TODO
 }
 
 
-impl FromStr for PrinterTypes {
+impl FromStr for ShellAdapter {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "cargo" => Ok(PrinterTypes::Cargo(cargo::Cargo::default())),
+            "cargo" => Ok(ShellAdapter::Cargo(cargo::Cargo::default())),
             // "pip" => Ok(Printers::Pip),
-            "tar" => Ok(PrinterTypes::Tar(tar::Extract::default())),
+            "tar" => Ok(ShellAdapter::Tar(tar::Extract::default())),
             _ => Err("Invalid printer".to_string())
         }
     }
 }
 
 
-impl Iterator for PrinterTypes {
+impl Iterator for ShellAdapter {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            PrinterTypes::Cargo(c) => c.next(),
+            ShellAdapter::Cargo(c) => c.next(),
             // PrinterTypes::Pip => unimplemented!(),
-            PrinterTypes::Tar(t) => t.next(),
+            ShellAdapter::Tar(t) => t.next(),
         }
     }
 }
 
-impl Printer for PrinterTypes {
+impl ShellOutput for ShellAdapter {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         match self {
-            PrinterTypes::Cargo(c) => { c.colorful(enable); }
+            ShellAdapter::Cargo(c) => { c.colorful(enable); }
             // PrinterTypes::Pip => unimplemented!(),
-            PrinterTypes::Tar(t) => { t.colorful(enable); }
+            ShellAdapter::Tar(t) => { t.colorful(enable); }
         }
         self
     }

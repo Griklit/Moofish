@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use clap::Parser;
 
-use moofish::PrinterTypes;
+use moofish::ShellAdapter;
 
 fn runtime_parser(s: &str) -> Result<Duration, String> {
     let chars = s.chars().collect::<Vec<char>>();
@@ -31,15 +31,15 @@ fn runtime_parser(s: &str) -> Result<Duration, String> {
 struct Args {
     /// Colorize the output
     #[arg(short, long)]
-    color: Option<bool>,
+    colorful: bool,
 
-    /// Runtime, e.g. 5s, 10m, 1h, 2d
+    /// Runtime
     #[arg(short = 't', long, value_parser = runtime_parser, default_value = "5s")]
     runtime: Duration,
 
-    /// The printer to use
+    /// The printer to use [tar | cargo]
     #[arg(required = true)]
-    printers: Vec<PrinterTypes>,
+    adapter: Vec<ShellAdapter>,
 }
 
 fn main() {
@@ -47,7 +47,7 @@ fn main() {
     println!("{:?}", args);
     let start_time = std::time::Instant::now();
     while std::time::Instant::now().duration_since(start_time) < args.runtime {
-        let line = args.printers[0].next();
+        let line = args.adapter[0].next();
         match line {
             Some(line) => { println!("{}", line); }
             None => { break; }

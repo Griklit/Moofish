@@ -1,6 +1,6 @@
 use std::io::{stdout, Write};
 
-use moofish::{Printer, tar};
+use moofish::{ShellOutput, tar};
 
 fn main() {
     let mut x = tar::Extract::default();

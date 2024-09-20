@@ -7,7 +7,7 @@ use rand::{Rng, SeedableRng};
 use rand::seq::SliceRandom;
 
 use crate::data::words::{EXTENSIONS, WORDS};
-use crate::Printer;
+use crate::ShellOutput;
 
 #[derive(Clone, Debug)]
 pub struct Extract<R: Rng> {
@@ -115,7 +115,7 @@ impl<R: Rng> Iterator for Extract<R> {
     }
 }
 
-impl<R: Rng> Printer for Extract<R> {
+impl<R: Rng> ShellOutput for Extract<R> {
     /// 设置是否启用彩色输出，此处不支持
     fn colorful(&mut self, _enable: bool) -> &mut Self {
         self

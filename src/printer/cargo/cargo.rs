@@ -1,7 +1,7 @@
 use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 
-use crate::Printer;
+use crate::ShellOutput;
 
 use super::compile::Compile;
 
@@ -20,7 +20,7 @@ impl Iterator for CargoComponent {
     }
 }
 
-impl Printer for CargoComponent {
+impl ShellOutput for CargoComponent {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         match self {
             CargoComponent::Compile(c) => { c.colorful(enable); }
@@ -58,7 +58,7 @@ impl Iterator for Cargo {
     }
 }
 
-impl Printer for Cargo {
+impl ShellOutput for Cargo {
     fn colorful(&mut self, enable: bool) -> &mut Self {
         self.colorful = enable;
         self
